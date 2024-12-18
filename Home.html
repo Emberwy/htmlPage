@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grading Information</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f9;
+    }
+    .container {
+      display: flex;
+      width: 80%;
+      height: 80%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      background-color: white;
+      border-radius: 8px;
+    }
+    .left-panel, .right-panel {
+      flex: 1;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .left-panel {
+      border-right: 1px solid #ccc;
+    }
+    .field {
+      margin-bottom: 15px;
+    }
+    .field label {
+      font-weight: bold;
+    }
+    .field-value {
+      margin-left: 10px;
+      color: #555;
+    }
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .switch-group {
+      margin-bottom: 20px;
+    }
+    .switch-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .switch-group input {
+      margin-right: 10px;
+    }
+    .comment-area {
+      margin-top: 20px;
+    }
+    .comment-area textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .input-field {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Left Panel (fields) -->
+    <div class="left-panel">
+      <div class="field">
+        <label for="total-score">Total Score:</label>
+        <span id="total-score" class="field-value">85</span>
+      </div>
+      <div class="field">
+        <label for="grade">Grade:</label>
+        <select id="grade" class="input-field">
+          <option value="Gold+" selected>Gold+</option>
+          <option value="Gold">Gold</option>
+          <option value="Green">Green</option>
+          <option value="Grey">Grey</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="final-decision">Final Decision:</label>
+        <select id="final-decision" class="input-field">
+          <option value="Accept" selected>Accept</option>
+          <option value="Reject">Reject</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="content-type">Content Type:</label>
+        <select id="content-type" class="input-field">
+          <option value="Videos" selected>Videos</option>
+          <option value="Articles">Articles or Galleries</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="grader">Grader:</label>
+        <select id="grader" class="input-field">
+          <option value="AI" selected>AI</option>
+          <option value="Human">Human</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="grading-date">Grading Date:</label>
+        <input type="date" id="grading-date" class="input-field" value="2024-12-16">
+      </div>
+    </div>
+
+    <!-- Right Panel (Switches and Comment) -->
+    <div class="right-panel">
+      <!-- Switches (6 switches) -->
+      <div class="switch-group">
+        <label for="switch1">Switch 1:</label>
+        <input type="checkbox" id="switch1">
+      </div>
+      <div class="switch-group">
+        <label for="switch2">Switch 2:</label>
+        <input type="checkbox" id="switch2">
+      </div>
+      <div class="switch-group">
+        <label for="switch3">Switch 3:</label>
+        <input type="checkbox" id="switch3">
+      </div>
+      <div class="switch-group">
+        <label for="switch4">Switch 4:</label>
+        <input type="checkbox" id="switch4">
+      </div>
+      <div class="switch-group">
+        <label for="switch5">Switch 5:</label>
+        <input type="checkbox" id="switch5">
+      </div>
+      <div class="switch-group">
+        <label for="switch6">Switch 6:</label>
+        <input type="checkbox" id="switch6">
+      </div>
+
+      <!-- Comment Area -->
+      <div class="comment-area">
+        <label for="comment">Comment:</label>
+        <textarea id="comment" placeholder="Enter your comment here..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Example fixed data structure (you can replace this with API call later)
+    const data = {
+      totalScore: 85,
+      grade: 'Gold+',
+      finalDecision: 'Accept',
+      contentType: 'Videos',
+      grader: 'AI',
+      gradingDate: '2024-12-16',
+      switches: [true, false, true, false, true, false],
+      comment: 'Great work, keep it up!'
+    };
+
+    // Function to populate the page with the data
+    function populatePage(data) {
+      // Left panel
+      document.getElementById('total-score').textContent = data.totalScore;
+      document.getElementById('grade').value = data.grade;
+      document.getElementById('final-decision').value = data.finalDecision;
+      document.getElementById('content-type').value = data.contentType;
+      document.getElementById('grader').value = data.grader;
+      document.getElementById('grading-date').value = data.gradingDate;
+
+      // Right panel switches
+      data.switches.forEach((state, index) => {
+        document.getElementById(`switch${index + 1}`).checked = state;
+      });
+
+      // Right panel comment
+      document.getElementById('comment').value = data.comment;
+    }
+
+    // Initialize page with sample data
+    populatePage(data);
+
+    // TODO: Replace the `data` variable with an API call in the future.
+    // Example API call (assuming a function `getGradingData()`):
+    // fetch('/api/grading')
+    //   .then(response => response.json())
+    //   .then(data => populatePage(data))
+    //   .catch(error => console.error('Error fetching grading data:', error));
+  </script>
+
+</body>
+</html>
