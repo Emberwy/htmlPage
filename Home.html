@@ -4,100 +4,154 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Grading Information</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px;
-      background-color: #f4f4f9;
-    }
-    .container {
-      display: flex;
-      width: 80%;
-      height: 80%;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      background-color: white;
-      border-radius: 8px;
-    }
-    .left-panel, .right-panel {
-      flex: 1;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-    .left-panel {
-      border-right: 1px solid #ccc;
-    }
-    .field {
-      margin-bottom: 15px;
-    }
-    .field label {
-      font-weight: bold;
-    }
-    .field-value {
-      margin-left: 10px;
-      color: #555;
-    }
-    .right-panel {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .switch-group {
-      margin-bottom: 20px;
-    }
-    .switch-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    .switch-group input {
-      margin-right: 10px;
-    }
-    .comment-area {
-      margin-top: 20px;
-    }
-    .comment-area textarea {
-      width: 100%;
-      height: 100px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-    .input-field {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-    select {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-  </style>
 </head>
+<script src="http://code.jquery.com/jquery-3.6.0.min.js"></script>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f9;
+  }
+  .container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px; /* Space between panels */
+    width: 80%;
+    height: 80%;
+  }
+  .panel {
+    flex: 1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .field label {
+    flex: 1;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  .field input, .field select {
+    flex: 2;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+  .field input[readonly] {
+    background-color: #f0f0f0;
+    color: #555;
+  }
+  .right-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .switch-group {
+    margin-bottom: 20px;
+  }
+  .switch-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  .switch-group input {
+    margin-right: 10px;
+  }
+  .comment-area {
+    margin-top: 20px;
+  }
+  .comment-area textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  /* switch's css */
+  .text-switch { display: none;}
+  .text-switch + label {
+    display: inline-block;
+    box-sizing: border-box;
+    height: 22px;
+    min-width: 44px;
+    line-height: 20px;
+    vertical-align: middle;
+    border-radius: 100px;
+    border: 1px solid transparent;
+    background-color: rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    -webkit-transition: all 0.36s;
+    transition: all 0.36s;
+    position: relative;
+  }
+  .text-switch:checked + label {
+    background-color: #1890ff;
+  }
+  .text-switch + label::before {
+    content: "";
+    display: block;
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 1px;
+    top: 1px;
+    border-radius: 18px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.36s cubic-bezier(0.78, 0.14, 0.15, 0.86);
+    -webkit-transition: all 0.36s cubic-bezier(0.78, 0.14, 0.15, 0.86);
+    -webkit-box-shadow: 0 2px 4px 0 rgba(0, 35, 11, 0.2);
+    box-shadow: 0 2px 4px 0 rgba(0, 35, 11, 0.2);
+  }
+  .text-switch:checked + label::before {
+    left: 23px;
+    transition: all 0.36s cubic-bezier(0.78, 0.14, 0.15, 0.86);
+    -webkit-transition: all 0.36s cubic-bezier(0.78, 0.14, 0.15, 0.86);
+  }
+  .text-switch + label::after {
+    content: "N";
+    position: absolute;
+    top: 1px;
+    left: 24px;
+    font-size: 12px;
+    color: #fff;
+  }
+  .text-switch:checked + label::after {
+    content: "Y";
+    left: 5px;
+  }
+</style>
 <body>
 
   <div class="container">
     <!-- Left Panel (fields) -->
-    <div class="left-panel">
+    <div class="panel left-panel">
       <div class="field">
         <label for="total-score">Total Score:</label>
-        <span id="total-score" class="field-value">85</span>
+        <input type="text" id="total-score" value="85" readonly>
       </div>
       <div class="field">
         <label for="grade">Grade:</label>
-        <select id="grade" class="input-field">
+        <select id="grade">
           <option value="Gold+" selected>Gold+</option>
           <option value="Gold">Gold</option>
           <option value="Green">Green</option>
@@ -106,59 +160,64 @@
       </div>
       <div class="field">
         <label for="final-decision">Final Decision:</label>
-        <select id="final-decision" class="input-field">
+        <select id="final-decision">
           <option value="Accept" selected>Accept</option>
           <option value="Reject">Reject</option>
         </select>
       </div>
       <div class="field">
         <label for="content-type">Content Type:</label>
-        <select id="content-type" class="input-field">
+        <select id="content-type">
           <option value="Videos" selected>Videos</option>
           <option value="Articles">Articles or Galleries</option>
         </select>
       </div>
       <div class="field">
         <label for="grader">Grader:</label>
-        <select id="grader" class="input-field">
+        <select id="grader">
           <option value="AI" selected>AI</option>
           <option value="Human">Human</option>
         </select>
       </div>
       <div class="field">
         <label for="grading-date">Grading Date:</label>
-        <input type="date" id="grading-date" class="input-field" value="2024-12-16">
+        <input type="date" id="grading-date" value="2024-12-16">
       </div>
     </div>
 
     <!-- Right Panel (Switches and Comment) -->
-    <div class="right-panel">
+    <div class="panel right-panel">
       <!-- Switches (6 switches) -->
       <div class="switch-group">
-        <label for="switch1">Switch 1:</label>
-        <input type="checkbox" id="switch1">
+        <span style="margin-right:3px;">switch1:</span>
+        <input type="checkbox" id="switch1" class="text-switch"/>
+        <label for="switch1"></label>
       </div>
       <div class="switch-group">
-        <label for="switch2">Switch 2:</label>
-        <input type="checkbox" id="switch2">
+        <span style="margin-right:3px;">switch2:</span>
+        <input type="checkbox" id="switch2" class="text-switch"/>
+        <label for="switch2"></label>
       </div>
       <div class="switch-group">
-        <label for="switch3">Switch 3:</label>
-        <input type="checkbox" id="switch3">
+        <span style="margin-right:3px;">switch3:</span>
+        <input type="checkbox" id="switch3" class="text-switch"/>
+        <label for="switch3"></label>
       </div>
       <div class="switch-group">
-        <label for="switch4">Switch 4:</label>
-        <input type="checkbox" id="switch4">
+        <span style="margin-right:3px;">switch4:</span>
+        <input type="checkbox" id="switch4" class="text-switch"/>
+        <label for="switch4"></label>
       </div>
       <div class="switch-group">
-        <label for="switch5">Switch 5:</label>
-        <input type="checkbox" id="switch5">
+        <span style="margin-right:3px;">switch5:</span>
+        <input type="checkbox" id="switch5" class="text-switch"/>
+        <label for="switch5"></label>
       </div>
       <div class="switch-group">
-        <label for="switch6">Switch 6:</label>
-        <input type="checkbox" id="switch6">
+        <span style="margin-right:3px;">switch6:</span>
+        <input type="checkbox" id="switch6" class="text-switch"/>
+        <label for="switch6"></label>
       </div>
-
       <!-- Comment Area -->
       <div class="comment-area">
         <label for="comment">Comment:</label>
@@ -183,7 +242,7 @@
     // Function to populate the page with the data
     function populatePage(data) {
       // Left panel
-      document.getElementById('total-score').textContent = data.totalScore;
+      document.getElementById('total-score').value = data.totalScore;
       document.getElementById('grade').value = data.grade;
       document.getElementById('final-decision').value = data.finalDecision;
       document.getElementById('content-type').value = data.contentType;
@@ -201,13 +260,6 @@
 
     // Initialize page with sample data
     populatePage(data);
-
-    // TODO: Replace the `data` variable with an API call in the future.
-    // Example API call (assuming a function `getGradingData()`):
-    // fetch('/api/grading')
-    //   .then(response => response.json())
-    //   .then(data => populatePage(data))
-    //   .catch(error => console.error('Error fetching grading data:', error));
   </script>
 
 </body>
