@@ -6,36 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grading Information</title>
 </head>
-<script>
-     window.jsonData="";
-     window.DataId="";
-     </script>
 <script src="http://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script type="text/javascript" src="ava_sendToPDP"></script>
-<script>
-
-function collectAllFieldsData() {
-    const data = {};
-    // æ¶éå·¦è¾¹é¢æ¿ï¼é¤Total ScoreåGraderå­æ®µå¤ï¼å­æ®µå¼
-    const leftPanelInputs = document.querySelectorAll('.left-panel input:not([readonly]):not(#total-score):not(#grader)');
-    leftPanelInputs.forEach(input => {
-        data[input.id] = input.value;
-    });
-    const leftPanelSelects = document.querySelectorAll('.left-panel select:not(#total-score):not(#grader)');
-    leftPanelSelects.forEach(select => {
-        data[select.id] = select.value;
-    });
-    // æ¶éå³è¾¹é¢æ¿switchå­æ®µå¼
-    const switches = document.querySelectorAll('.text-switch');
-    switches.forEach((switchElement, index) => {
-        data[`switch${index + 1}`] = switchElement.checked;
-    });
-    // æ¶éå³è¾¹é¢æ¿è¯è®ºæ¡å­æ®µå¼
-    const commentTextarea = document.getElementById('comment');
-    data['comment'] = commentTextarea.value;
-    return data;
-}
-</script>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -92,7 +63,7 @@ function collectAllFieldsData() {
         border-radius: 4px;
         font-size: 14px;
         box-sizing: border-box;
-        /* è®¾ç½®åå§ä¸ºåªè¯»ç¶æ */
+        /* 设置初始为只读状态 */
         pointer-events: none;
         background-color: #f0f0f0;
         color: #555;
@@ -121,7 +92,7 @@ function collectAllFieldsData() {
 
  .switch-group input {
         margin-right: 10px;
-        /* è®¾ç½®åå§ä¸ºç¦ç¨ç¶æï¼ä½¿å¶ä¸å¯æä½ */
+        /* 设置初始为禁用状态，使其不可操作 */
         pointer-events: none;
         opacity: 0.5;
     }
@@ -137,7 +108,7 @@ function collectAllFieldsData() {
         border: 1px solid #ccc;
         border-radius: 4px;
         font-size: 14px;
-        /* è®¾ç½®åå§ä¸ºåªè¯»ç¶æ */
+        /* 设置初始为只读状态 */
         pointer-events: none;
         background-color: #f0f0f0;
         color: #555;
@@ -276,7 +247,7 @@ function collectAllFieldsData() {
                 <input type="date" id="grading-date" value="2024-12-16">
             </div>
 
-            <!-- æ°å¢çä¿®æ¹è®°å½è¡¨æ ¼ -->
+            <!-- 新增的修改记录表格 -->
             <label for="modifyRecordTable">Audit History:</label>
             <table id="modifyRecordTable">
                 <thead>
@@ -289,7 +260,7 @@ function collectAllFieldsData() {
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- è¿éå°éè¿JavaScriptå¨ææ·»å è¡ -->
+                    <!-- 这里将通过JavaScript动态添加行 -->
                 </tbody>
             </table>
         </div>
@@ -338,7 +309,6 @@ function collectAllFieldsData() {
     <script>
      Xrm = window.parent.Xrm;
      brandID = Xrm.Page.data.entity.getId().replace(/[\{\}]*/g, "").toLowerCase();
-     DataId=brandID;
      //add format
 String.prototype.format = function () {
     var args = arguments;
@@ -370,9 +340,9 @@ fetch(
                 }
             }
         ).then(resault=> resault.json()).then(resault => {
-            
+                 // 添加权限判断相关的变量，模拟是否有权限，实际中从相应接口等获取
                  console.log(resault,"BrandResault")
-        let hasEditPermission =(resault.value[0].ava_brandstatus==915240000 || resault.value[0].ava_partnerterminatestatus==751960007)?false: true; // è¿éåè®¾ä¸ºfalseï¼æ¨¡ææ æéæåµï¼ä½ å¯ä»¥æ ¹æ®å®éæåµæ¿æ¢è·åé»è¾
+        let hasEditPermission =(resault.value[0].ava_brandstatus==915240000 || resault.value[0].ava_partnerterminatestatus==751960007)?false: true; // 这里先设为false，模拟无权限情况，你可以根据实际情况替换获取逻辑
 
 
 
@@ -391,7 +361,7 @@ var FetchXmlString =
             </entity>
         </fetch>`;
 
-// å è½½æ¥å¿æ°æ®
+// 加载日志数据
 fetch(
     `/api/data/v9.1/ava_table1s?fetchXml=${encodeURI(FetchXmlString.format("ava_table1", "ava_tablelogicname", "ava_brand", "ava_dataid", brandID))}`,
     {
@@ -438,62 +408,53 @@ fetch(
     console.error(err);
 });
 
-// å¤æ­æéå¹¶è®¾ç½®é¡µé¢åç´ æ¯å¦å¯ç¼è¾
+// 判断权限并设置页面元素是否可编辑
 function setEditableBasedOnPermission() {
-    if (hasEditPermission) {
-        const switches = document.querySelectorAll('.text-switch');
-        // éæ©é¤äºTotal ScoreåGraderå­æ®µå¤çå¯ç¼è¾åç´ 
-        const editableElements = document.querySelectorAll('input:not([readonly]):not(#total-score):not(#grader), select:not(#total-score):not(#grader), textarea, input[type="checkbox"]');
-        switches.forEach(switchElement => {
-            switchElement.removeAttribute('disabled');
+if (hasEditPermission) {
+    const switches = document.querySelectorAll('.text-switch');
+    // 选择除了Total Score和Grader字段外的可编辑元素
+    const editableElements = document.querySelectorAll('input:not([readonly]):not(#total-score):not(#grader), select:not(#total-score):not(#grader), textarea, input[type="checkbox"]');
+    switches.forEach(switchElement => {
+       
+                switchElement.removeAttribute('disabled');
+            
         });
-        editableElements.forEach(element => {
-            element.style.pointerEvents = 'auto';
-            element.style.opacity = '1';
-            element.style.backgroundColor = '';
-            element.style.color = '';
-            if (element.tagName === 'INPUT' && element.type === 'checkbox') {
-                element.addEventListener('change', function () {
-                    // æ¶éææå­æ®µå¼å°JSONå¯¹è±¡ï¼å¹¶è®¡ç®åå¸å¼
-                    const allFieldsData = collectAllFieldsData();
-                    window.jsonData = JSON.stringify(allFieldsData);
-                    window.hashValue = simpleHash(jsonData);
-                    console.log("æ¶éçææå­æ®µæ°æ®JSON:", jsonData);
-                    console.log("è®¡ç®çåå¸å¼:", hashValue);
-                    // å¨è¿éå¯ä»¥æ·»å å·ä½çé»è¾ï¼æ¯å¦å°JSONæ°æ®ååå¸å¼åéå°åç«¯ç­
-                    console.log(`${this.id} çç¶æè¢«ä¿®æ¹ä¸º: ${this.checked}`);
-                });
-            } else {
-                element.addEventListener('change', function () {
-                    // æ¶éææå­æ®µå¼å°JSONå¯¹è±¡ï¼å¹¶è®¡ç®åå¸å¼
-                    const allFieldsData = collectAllFieldsData();
-                    window.jsonData = JSON.stringify(allFieldsData);
-                    window.hashValue = simpleHash(jsonData);
-                    console.log("æ¶éçææå­æ®µæ°æ®JSON:", jsonData);
-                    console.log("è®¡ç®çåå¸å¼:", hashValue);
-                    // å¨è¿éå¯ä»¥æ·»å å·ä½çé»è¾ï¼æ¯å¦å°JSONæ°æ®ååå¸å¼åéå°åç«¯ç­
-                    console.log(`${this.id} çå¼è¢«ä¿®æ¹ä¸º: ${this.value}`);
-                });
-            }
-        });
-        const warningElements = document.querySelectorAll('.warning-message');
+    editableElements.forEach(element => {
+        element.style.pointerEvents = 'auto';
+        element.style.opacity = '1';
+        element.style.backgroundColor = '';
+        element.style.color = '';
+        if (element.tagName === 'INPUT' && element.type === 'checkbox') {
+            element.addEventListener('change', function () {
+                // 在这里可以添加具体的逻辑，当复选框状态改变时，比如更新后端数据等
+                console.log(`${this.id} 的状态被修改为: ${this.checked}`);
+            });
+        } else {
+            element.addEventListener('change', function () {
+                // 在这里可以添加具体的逻辑，当元素值改变时，比如更新后端数据等
+                console.log(`${this.id} 的值被修改为: ${this.value}`);
+            });
+        }
+    });
+    const warningElements = document.querySelectorAll('.warning-message');
         warningElements.forEach(function (element) {
-            // è®¾ç½®displayå±æ§ä¸ºnoneæ¥éèåç´ 
+            // 设置display属性为none来隐藏元素
             element.style.display = 'none';
         });
 
-    } else {
-        // å¦ææ æéï¼ç¡®ä¿åç´ ä¿æåªè¯»ãç¦ç¨ç­ä¸å¯ç¼è¾ç¶æï¼éè¿æ ·å¼ç­éå¶æä½ï¼
-        const allElements = document.querySelectorAll('input, select, textarea, input[type="checkbox"]');
-        allElements.forEach(element => {
-            element.style.pointerEvents = 'none';
-            element.style.opacity = '0.5';
-            element.style.backgroundColor = '#f0f0f0';
-            element.style.color = '#555';
-        });
-    }
+} else {
+    // 如果无权限，确保元素保持只读、禁用等不可编辑状态（通过样式等限制操作）
+    const allElements = document.querySelectorAll('input, select, textarea, input[type="checkbox"]');
+    allElements.forEach(element => {
+        element.style.pointerEvents = 'none';
+        element.style.opacity = '0.5';
+        element.style.backgroundColor = '#f0f0f0';
+        element.style.color = '#555';
+    });
 }
-// ç¤ºä¾åºå®æ°æ®ç»æï¼ä¹åå¯ä»¥ç¨ API è°ç¨æ¿æ¢ï¼
+}
+
+// 示例固定数据结构（之后可以用 API 调用替换）
 const gradingData = {
     totalScore: 85,
     grade: 'Gold+',
@@ -505,7 +466,7 @@ const gradingData = {
     comment: 'Great work, keep it up!'
 };
 
-// å½æ°ç¨äºç¨æ°æ®å¡«åé¡µé¢
+// 函数用于用数据填充页面
 function populatePage(data) {
     // Left panel
     document.getElementById('total-score').value = data.totalScore;
@@ -519,17 +480,16 @@ function populatePage(data) {
     data.switches.forEach((state, index) => {
         document.getElementById(`switch${index + 1}`).checked = state;
     });
-    
 
     // Right panel comment
     document.getElementById('comment').value = data.comment;
 }
 
-// åå§åé¡µé¢ï¼åå¡«åæ°æ®ï¼åæ ¹æ®æéè®¾ç½®åç´ å¯ç¼è¾æ§
+// 初始化页面，先填充数据，再根据权限设置元素可编辑性
 populatePage(gradingData);
 setEditableBasedOnPermission();
 
-// TODO: ä¹åå° `hasEditPermission` åéæ¿æ¢ä¸ºçå®çæéè·åé»è¾ï¼æ¯å¦ä»æ¥å£è·åç¨æ·æéä¿¡æ¯ç­
+// TODO: 之后将 `hasEditPermission` 变量替换为真实的权限获取逻辑，比如从接口获取用户权限信息等
             }).catch(err => {
                 console.error(err)
             })

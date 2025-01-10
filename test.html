@@ -9,32 +9,54 @@
 <script>
      window.jsonData="";
      window.DataId="";
+     window.originalData="";
+     window.UserID="";
      </script>
 <script src="http://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type="text/javascript" src="ava_sendToPDP"></script>
 <script>
-
+// 示例固定数据结构（之后可以用 API 调用替换）
+const gradingData = {
+    totalScore: 85,
+    grade: 'Gold+',
+    finalDecision: 'Accept',
+    contentType: 'Videos',
+    grader: 'AI',
+    gradingDate: '2024-12-16',
+    switches: [true, false, true, false, true, false,true, false, true, false, true, false],
+    comment: 'Great work, keep it up!'
+};
 function collectAllFieldsData() {
     const data = {};
-    // æ¶éå·¦è¾¹é¢æ¿ï¼é¤Total ScoreåGraderå­æ®µå¤ï¼å­æ®µå¼
+    // 收集左边面板（除Total Score和Grader字段外）字段值
     const leftPanelInputs = document.querySelectorAll('.left-panel input:not([readonly]):not(#total-score):not(#grader)');
     leftPanelInputs.forEach(input => {
         data[input.id] = input.value;
     });
-    const leftPanelSelects = document.querySelectorAll('.left-panel select:not(#total-score):not(#grader)');
+    const leftPanelSelects = document.querySelectorAll('.left-panel select:not([readonly]):not(#total-score):not(#grader)');
     leftPanelSelects.forEach(select => {
         data[select.id] = select.value;
     });
-    // æ¶éå³è¾¹é¢æ¿switchå­æ®µå¼
-    const switches = document.querySelectorAll('.text-switch');
-    switches.forEach((switchElement, index) => {
-        data[`switch${index + 1}`] = switchElement.checked;
-    });
-    // æ¶éå³è¾¹é¢æ¿è¯è®ºæ¡å­æ®µå¼
+
+    // 根据实际的switch数量收集switch字段值（假设数据中有个表示switch数量的属性，这里用switchesLength示例）
+    const switchesLength = gradingData.switches.length; // 这里先以示例数据中的属性获取长度，实际可能从接口等其他地方获取
+    for (let i = 0; i < switchesLength; i++) {
+        const switchElement = document.getElementById(`switch${i + 1}`);
+        data[`switch${i + 1}`] = switchElement.checked;
+    }
+
+    // 收集右边面板评论框字段值
     const commentTextarea = document.getElementById('comment');
     data['comment'] = commentTextarea.value;
     return data;
 }
+function checkAndHideSwitches(contentTypeValue, switchContainer) {
+        if (contentTypeValue === 'Videos') {
+            switchContainer.style.display = 'none';
+        } else {
+            switchContainer.style.display = 'block';
+        }
+    }
 </script>
 <style>
     body {
@@ -92,7 +114,7 @@ function collectAllFieldsData() {
         border-radius: 4px;
         font-size: 14px;
         box-sizing: border-box;
-        /* è®¾ç½®åå§ä¸ºåªè¯»ç¶æ */
+        /* 设置初始为只读状态 */
         pointer-events: none;
         background-color: #f0f0f0;
         color: #555;
@@ -121,7 +143,7 @@ function collectAllFieldsData() {
 
  .switch-group input {
         margin-right: 10px;
-        /* è®¾ç½®åå§ä¸ºç¦ç¨ç¶æï¼ä½¿å¶ä¸å¯æä½ */
+        /* 设置初始为禁用状态，使其不可操作 */
         pointer-events: none;
         opacity: 0.5;
     }
@@ -137,7 +159,7 @@ function collectAllFieldsData() {
         border: 1px solid #ccc;
         border-radius: 4px;
         font-size: 14px;
-        /* è®¾ç½®åå§ä¸ºåªè¯»ç¶æ */
+        /* 设置初始为只读状态 */
         pointer-events: none;
         background-color: #f0f0f0;
         color: #555;
@@ -276,7 +298,7 @@ function collectAllFieldsData() {
                 <input type="date" id="grading-date" value="2024-12-16">
             </div>
 
-            <!-- æ°å¢çä¿®æ¹è®°å½è¡¨æ ¼ -->
+            <!-- 新增的修改记录表格 -->
             <label for="modifyRecordTable">Audit History:</label>
             <table id="modifyRecordTable">
                 <thead>
@@ -289,44 +311,15 @@ function collectAllFieldsData() {
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- è¿éå°éè¿JavaScriptå¨ææ·»å è¡ -->
+                    <!-- 这里将通过JavaScript动态添加行 -->
                 </tbody>
             </table>
         </div>
 
         <!-- Right Panel (Switches and Comment) -->
         <div class="panel right-panel">
-            <!-- Switches (6 switches) -->
-            <div class="switch-group">
-                <span style="margin-right: 3px;">switch1:</span>
-                <input type="checkbox" id="switch1" class="text-switch"  disabled/>
-                <label for="switch1"></label>
-            </div>
-            <div class="switch-group">
-                <span style="margin-right: 3px;">switch2:</span>
-                <input type="checkbox" id="switch2" class="text-switch"  disabled/>
-                <label for="switch2"></label>
-            </div>
-            <div class="switch-group">
-                <span style="margin-right: 3px;">switch3:</span>
-                <input type="checkbox" id="switch3" class="text-switch" disabled/>
-                <label for="switch3"></label>
-            </div>
-            <div class="switch-group">
-                <span style="margin-right: 3px;">switch4:</span>
-                <input type="checkbox" id="switch4" class="text-switch"  disabled/>
-                <label for="switch4"></label>
-            </div>
-            <div class="switch-group">
-                <span style="margin-right: 3px;">switch5:</span>
-                <input type="checkbox" id="switch5" class="text-switch"  disabled/>
-                <label for="switch5"></label>
-            </div>
-            <div class="switch-group">
-                <span style="margin-right: 3px;">switch6:</span>
-                <input type="checkbox" id="switch6" class="text-switch"  disabled/>
-                <label for="switch6"></label>
-            </div>
+            <!-- Switches（动态添加） -->
+            <div id="switchContainer"></div>
             <!-- Comment Area -->
             <div class="comment-area">
                 <label for="comment">Comment:</label>
@@ -338,6 +331,9 @@ function collectAllFieldsData() {
     <script>
      Xrm = window.parent.Xrm;
      brandID = Xrm.Page.data.entity.getId().replace(/[\{\}]*/g, "").toLowerCase();
+     var UserId =  window.parent.Xrm.Page.context.getUserId();
+     UserId = UserId.replace(/[\{\}]*/g, "").toLowerCase();
+     UserID=UserId;
      DataId=brandID;
      //add format
 String.prototype.format = function () {
@@ -372,7 +368,7 @@ fetch(
         ).then(resault=> resault.json()).then(resault => {
             
                  console.log(resault,"BrandResault")
-        let hasEditPermission =(resault.value[0].ava_brandstatus==915240000 || resault.value[0].ava_partnerterminatestatus==751960007)?false: true; // è¿éåè®¾ä¸ºfalseï¼æ¨¡ææ æéæåµï¼ä½ å¯ä»¥æ ¹æ®å®éæåµæ¿æ¢è·åé»è¾
+        let hasEditPermission =(resault.value[0].ava_brandstatus==915240000 || resault.value[0].ava_partnerterminatestatus==751960007)?false: true; // 这里先设为false，模拟无权限情况，你可以根据实际情况替换获取逻辑
 
 
 
@@ -388,10 +384,11 @@ var FetchXmlString =
                     </condition>
                     <condition attribute="{3}" operator='eq' value="{4}"/>
                 </filter>
+                <order attribute="ava_changedate" descending="true" />
             </entity>
         </fetch>`;
 
-// å è½½æ¥å¿æ°æ®
+// 加载日志数据
 fetch(
     `/api/data/v9.1/ava_table1s?fetchXml=${encodeURI(FetchXmlString.format("ava_table1", "ava_tablelogicname", "ava_brand", "ava_dataid", brandID))}`,
     {
@@ -405,13 +402,15 @@ fetch(
     // if (ele) {
     //     ele.innerText = res["@odata.count"]
     // }
-    console.log(res, "res");
-    loadData = JSON.parse(res.value[0].ava_changes);
+    for(var i in res.value ){
+        console.log(i, "res");
+    loadData = JSON.parse( res.value[i].ava_changes);
     console.log(loadData, "loadData");
     const tableBody = document.getElementById('modifyRecordTable').getElementsByTagName('tbody')[0];
-
+    Editor=res.value[i]["_createdby_value@OData.Community.Display.V1.FormattedValue"]
     loadData.forEach((record) => {
-        record.changes.forEach((change) => {
+       const changes=JSON.parse(record.changes);
+       changes.forEach((change) => {
             const row = document.createElement('tr');
             const dateCell = document.createElement('td');
             dateCell.textContent = record.date;
@@ -422,7 +421,7 @@ fetch(
             const newCell = document.createElement('td');
             newCell.textContent = JSON.stringify(change.new.value);
             const EditorCell = document.createElement('td');
-            EditorCell.textContent = record.Editor;
+            EditorCell.textContent = Editor;
 
             row.appendChild(dateCell);
             row.appendChild(fieldCell);
@@ -434,56 +433,76 @@ fetch(
         });
     });
 
+    }
+  
 }).catch(err => {
     console.error(err);
 });
 
-// å¤æ­æéå¹¶è®¾ç½®é¡µé¢åç´ æ¯å¦å¯ç¼è¾
+// 判断权限并设置页面元素是否可编辑
 function setEditableBasedOnPermission() {
     if (hasEditPermission) {
-        const switches = document.querySelectorAll('.text-switch');
-        // éæ©é¤äºTotal ScoreåGraderå­æ®µå¤çå¯ç¼è¾åç´ 
-        const editableElements = document.querySelectorAll('input:not([readonly]):not(#total-score):not(#grader), select:not(#total-score):not(#grader), textarea, input[type="checkbox"]');
-        switches.forEach(switchElement => {
-            switchElement.removeAttribute('disabled');
-        });
+        const contentType = document.getElementById('content-type').value;
+        const switchContainer = document.getElementById('switchContainer');
+        // 这里直接调用之前定义的函数来处理switch元素显示隐藏，保持逻辑统一
+        checkAndHideSwitches(contentType, switchContainer);
+
+        // 其他可编辑元素相关的权限设置及change事件监听等逻辑保持不变
+        const editableElements = document.querySelectorAll('input:not([readonly]):not(#total-score):not(#grader), select:not([readonly]):not(#total-score):not(#grader), textarea, input[type="checkbox"]');
         editableElements.forEach(element => {
             element.style.pointerEvents = 'auto';
             element.style.opacity = '1';
             element.style.backgroundColor = '';
             element.style.color = '';
-            if (element.tagName === 'INPUT' && element.type === 'checkbox') {
+            if (element.id=== 'content-type') {
+                // 为Content Type元素添加change事件监听，处理switch显示隐藏逻辑
                 element.addEventListener('change', function () {
-                    // æ¶éææå­æ®µå¼å°JSONå¯¹è±¡ï¼å¹¶è®¡ç®åå¸å¼
                     const allFieldsData = collectAllFieldsData();
                     window.jsonData = JSON.stringify(allFieldsData);
                     window.hashValue = simpleHash(jsonData);
-                    console.log("æ¶éçææå­æ®µæ°æ®JSON:", jsonData);
-                    console.log("è®¡ç®çåå¸å¼:", hashValue);
-                    // å¨è¿éå¯ä»¥æ·»å å·ä½çé»è¾ï¼æ¯å¦å°JSONæ°æ®ååå¸å¼åéå°åç«¯ç­
-                    console.log(`${this.id} çç¶æè¢«ä¿®æ¹ä¸º: ${this.checked}`);
+                    console.log("收集的所有字段数据JSON:", jsonData);
+                    console.log("计算的哈希值:", hashValue);
+                    console.log(`${this.id} 的状态被修改为: ${this.checked}`);
+                    const switchContainer = document.getElementById('switchContainer');
+                    if (this.value === 'Videos') {
+                        switchContainer.style.display = 'none';
+                    } else {
+                        switchContainer.style.display = 'block';
+                        if (hasEditPermission) {
+                            const switches = document.querySelectorAll('.text-switch');
+                            switches.forEach(switchElement => {
+                                switchElement.removeAttribute('disabled');
+                            });
+                        }
+                    }
+                });
+            } else if (element.tagName === 'INPUT' && element.type === 'checkbox') {
+                element.addEventListener('change', function () {
+                    const allFieldsData = collectAllFieldsData();
+                    window.jsonData = JSON.stringify(allFieldsData);
+                    window.hashValue = simpleHash(jsonData);
+                    console.log("收集的所有字段数据JSON:", jsonData);
+                    console.log("计算的哈希值:", hashValue);
+                    console.log(`${this.id} 的状态被修改为: ${this.checked}`);
                 });
             } else {
                 element.addEventListener('change', function () {
-                    // æ¶éææå­æ®µå¼å°JSONå¯¹è±¡ï¼å¹¶è®¡ç®åå¸å¼
                     const allFieldsData = collectAllFieldsData();
                     window.jsonData = JSON.stringify(allFieldsData);
                     window.hashValue = simpleHash(jsonData);
-                    console.log("æ¶éçææå­æ®µæ°æ®JSON:", jsonData);
-                    console.log("è®¡ç®çåå¸å¼:", hashValue);
-                    // å¨è¿éå¯ä»¥æ·»å å·ä½çé»è¾ï¼æ¯å¦å°JSONæ°æ®ååå¸å¼åéå°åç«¯ç­
-                    console.log(`${this.id} çå¼è¢«ä¿®æ¹ä¸º: ${this.value}`);
+                    console.log("收集的所有字段数据JSON:", jsonData);
+                    console.log("计算的哈希值:", hashValue);
+                    console.log(`${this.id} 的值被修改为: ${this.value}`);
                 });
             }
         });
+
         const warningElements = document.querySelectorAll('.warning-message');
-        warningElements.forEach(function (element) {
-            // è®¾ç½®displayå±æ§ä¸ºnoneæ¥éèåç´ 
+        warningElements.forEach(element => {
             element.style.display = 'none';
         });
 
     } else {
-        // å¦ææ æéï¼ç¡®ä¿åç´ ä¿æåªè¯»ãç¦ç¨ç­ä¸å¯ç¼è¾ç¶æï¼éè¿æ ·å¼ç­éå¶æä½ï¼
         const allElements = document.querySelectorAll('input, select, textarea, input[type="checkbox"]');
         allElements.forEach(element => {
             element.style.pointerEvents = 'none';
@@ -493,19 +512,10 @@ function setEditableBasedOnPermission() {
         });
     }
 }
-// ç¤ºä¾åºå®æ°æ®ç»æï¼ä¹åå¯ä»¥ç¨ API è°ç¨æ¿æ¢ï¼
-const gradingData = {
-    totalScore: 85,
-    grade: 'Gold+',
-    finalDecision: 'Accept',
-    contentType: 'Videos',
-    grader: 'Ahhh',
-    gradingDate: '2024-12-16',
-    switches: [true, false, true, false, true, false],
-    comment: 'Great work, keep it up!'
-};
 
-// å½æ°ç¨äºç¨æ°æ®å¡«åé¡µé¢
+originalData=gradingData;
+
+// 函数用于用数据填充页面
 function populatePage(data) {
     // Left panel
     document.getElementById('total-score').value = data.totalScore;
@@ -515,21 +525,50 @@ function populatePage(data) {
     document.getElementById('grader').value = data.grader;
     document.getElementById('grading-date').value = data.gradingDate;
 
-    // Right panel switches
+
+    // Right panel switches，动态渲染switch元素，并添加前置标签
+    const switchContainer = document.getElementById('switchContainer');
+    switchContainer.innerHTML = ''; // 先清空容器内容
     data.switches.forEach((state, index) => {
-        document.getElementById(`switch${index + 1}`).checked = state;
+        const switchGroup = document.createElement('div');
+        switchGroup.classList.add('switch-group');
+
+        const labelText = document.createElement('span');
+        labelText.style.marginRight = '3px';
+        labelText.textContent = `switch${index + 1}:`;
+        switchGroup.appendChild(labelText);
+
+        const switchInput = document.createElement('input');
+        switchInput.type = 'checkbox';
+        switchInput.id = `switch${index + 1}`;
+        switchInput.classList.add('text-switch');
+        switchInput.checked = state;
+        switchGroup.appendChild(switchInput);
+
+        const switchLabel = document.createElement('label');
+        switchLabel.htmlFor = `switch${index + 1}`;
+        switchGroup.appendChild(switchLabel);
+
+        switchContainer.appendChild(switchGroup);
     });
-    
 
     // Right panel comment
     document.getElementById('comment').value = data.comment;
 }
 
-// åå§åé¡µé¢ï¼åå¡«åæ°æ®ï¼åæ ¹æ®æéè®¾ç½®åç´ å¯ç¼è¾æ§
+// 初始化页面，先填充数据，再根据权限设置元素可编辑性
 populatePage(gradingData);
 setEditableBasedOnPermission();
+document.addEventListener('DOMContentLoaded', function () {
+    const contentType = document.getElementById('content-type');
+    const switchContainer = document.getElementById('switchContainer');
 
-// TODO: ä¹åå° `hasEditPermission` åéæ¿æ¢ä¸ºçå®çæéè·åé»è¾ï¼æ¯å¦ä»æ¥å£è·åç¨æ·æéä¿¡æ¯ç­
+    // 页面加载时先检查处理一次
+    checkAndHideSwitches(contentType.value, switchContainer);
+
+  
+});
+// TODO: 之后将 `hasEditPermission` 变量替换为真实的权限获取逻辑，比如从接口获取用户权限信息等
             }).catch(err => {
                 console.error(err)
             })
